@@ -19,7 +19,7 @@ Checkboxes track progress; "Done when" is the bar for moving on.
 ## Step 1 — Project skeleton, safety rails & CI
 Goal: a running, tested Spring Boot app talking to Postgres, with secrets, privacy, and CI handled from commit #1.
 
-- [ ] Spring Boot 3.x project, Java 21 (pick Gradle Kotlin DSL **or** Maven and stay consistent)
+- [ ] Spring Boot 3.x project on a recent Java LTS (pick Gradle Kotlin DSL **or** Maven and stay consistent)
 - [ ] `.gitignore` in place **before** the first commit (`.env`, `*.db`, `data/`, `application-local.*`, real `*.csv`)
 - [ ] DB URL/credentials via environment variables only
 - [ ] Flyway wired up; `V1` migration creates `instrument` and `transaction` tables
