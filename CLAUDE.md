@@ -109,7 +109,8 @@ Abstract the data source behind a `PriceProvider` / `FxProvider` interface.
 ## Build order (evening-sized increments)
 
 1. Project skeleton: Spring Boot + Postgres + Flyway, first migration, transaction CRUD,
-   plus `.gitignore` and env-var config from the very first commit.
+   plus `.gitignore`, env-var config, a Testcontainers slice test, and GitHub Actions CI
+   from the very first commit.
 2. CSV import endpoint with dedup via `external_id`; commit fake seed data.
 3. Holdings + current-value endpoint (manual price/FX rows first).
 4. Performance endpoint: XIRR + CAGR, written test-first.
@@ -117,7 +118,9 @@ Abstract the data source behind a `PriceProvider` / `FxProvider` interface.
 6. Monte Carlo projection endpoint.
 7. Vue dashboard: portfolio value over time + FIRE projection fan chart (p10/p50/p90),
    consuming the REST API.
-8. Testcontainers integration tests, a clean README with architecture diagram + API docs.
+8. Coverage sweep: end-to-end integration tests for any flow not yet covered, plus a clean
+   README with architecture diagram + API docs. (Unit/integration tests grow per step, not
+   here — this is the gap-filling pass.)
 9. Deploy: backend to Render + Neon, frontend to Netlify/Cloudflare Pages; configure CORS
    and an env-based API base URL; set up the keep-alive pinger; point the public demo at a
    separate demo database seeded with fake data.
@@ -125,7 +128,9 @@ Abstract the data source behind a `PriceProvider` / `FxProvider` interface.
 ## Working agreements (for Claude Code)
 
 - Propose a plan and let me review before large changes.
-- Test-first for the XIRR and Monte Carlo logic; these are the algorithms that matter.
+- Tests land in the same step as the code they cover — never deferred. Test-first for the
+  algorithms that matter (XIRR, Monte Carlo); test-alongside for controllers and wiring.
+  CI runs the suite on every push from the first commit.
 - Use `BigDecimal` for all monetary math.
 - Keep commits small and frequent with clear messages — the history should read as a
   series of deliberate, reviewable steps.
