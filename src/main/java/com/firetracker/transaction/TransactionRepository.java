@@ -16,4 +16,18 @@ public interface TransactionRepository
      */
     @Query("select t.externalId from Transaction t where t.externalId in :ids")
     List<String> findExistingExternalIds(@Param("ids") Collection<String> ids);
+
+    /**
+     * Net units held per instrument, computed DB-side: BUY adds, SELL subtracts, and
+     * DIVIDEND is ignored (a cash distribution, not a change in units). Returns one row per
+     * ticker that has any transactions; callers drop fully-closed (zero-net) positions.
+     */
+    @Query("""
+            select t.ticker as ticker,
+                   coalesce(sum(case when t.type = com.firetracker.transaction.TransactionType.BUY  then t.quantity else 0 end), 0)
+                 - coalesce(sum(case when t.type = com.firetracker.transaction.TransactionType.SELL then t.quantity else 0 end), 0) as units
+            from Transaction t
+            group by t.ticker
+            """)
+    List<HoldingRow> aggregateHoldings();
 }

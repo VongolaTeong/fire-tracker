@@ -1,5 +1,6 @@
 package com.firetracker.common;
 
+import com.firetracker.portfolio.MissingMarketDataException;
 import com.firetracker.transaction.CsvImportException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,6 +33,16 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleCsvImport(CsvImportException ex) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
         problem.setTitle("CSV import failed");
+        return problem;
+    }
+
+    @ExceptionHandler(MissingMarketDataException.class)
+    public ProblemDetail handleMissingMarketData(MissingMarketDataException ex) {
+        // 422: the request is well-formed, but the portfolio can't be valued until the
+        // missing price/FX rows exist — distinct from a 400 (bad request) or 404 (no route).
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
+        problem.setTitle("Missing market data");
         return problem;
     }
 }

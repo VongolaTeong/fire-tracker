@@ -43,11 +43,11 @@ Done when: importing the sample file twice yields the same row count the second 
 ## Step 3 — Holdings & current value
 Goal: turn the ledger into a current portfolio snapshot.
 
-- [ ] `V2` migration: `price_history` and `fx_rate` tables (with their unique constraints)
-- [ ] Seed manual price/FX rows (no external API yet)
-- [ ] `GET /api/portfolio/holdings` — units held per instrument
-- [ ] `GET /api/portfolio/value` — market value in SGD + per-currency breakdown
-- [ ] Tests: holdings aggregation and SGD valuation against seeded data, incl. a multi-currency case
+- [x] `V2` migration: `price_history` and `fx_rate` tables (with their unique constraints)
+- [x] Seed manual price/FX rows (no external API yet)
+- [x] `GET /api/portfolio/holdings` — units held per instrument
+- [x] `GET /api/portfolio/value` — market value in SGD + per-currency breakdown
+- [x] Tests: holdings aggregation and SGD valuation against seeded data, incl. a multi-currency case
 
 Done when: holdings and value endpoints return correct figures against the seeded data, covered by tests.
 

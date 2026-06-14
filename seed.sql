@@ -30,3 +30,20 @@ insert into transaction
     ('es3-2025-05',      'ES3',  'BUY',      280.000000,   3.55, 'SGD', 2.50, '2025-05-14'),
     ('es3-2025-08',      'ES3',  'BUY',      310.000000,   3.48, 'SGD', 2.50, '2025-08-13')
 on conflict (external_id) where external_id is not null do nothing;
+
+-- Manual close prices (Step 3 — no market-data API yet). Each instrument is priced in its
+-- own currency; the latest price_date per ticker drives current valuation, the earlier row
+-- is just there so "latest wins" is demonstrable. INVENTED numbers.
+insert into price_history (ticker, price_date, close_price, currency) values
+    ('VWRA', '2025-07-15', 126.80, 'USD'),
+    ('VWRA', '2025-08-15', 129.50, 'USD'),
+    ('ES3',  '2025-07-15',   3.49, 'SGD'),
+    ('ES3',  '2025-08-15',   3.52, 'SGD')
+on conflict (ticker, price_date) do nothing;
+
+-- Manual USD->SGD FX rates (Step 3). 1 USD = `rate` SGD; latest rate_date drives valuation.
+-- SGD holdings need no row (they convert at 1). INVENTED numbers.
+insert into fx_rate (rate_date, base_currency, quote_currency, rate) values
+    ('2025-07-15', 'USD', 'SGD', 1.34000000),
+    ('2025-08-15', 'USD', 'SGD', 1.35000000)
+on conflict (rate_date, base_currency, quote_currency) do nothing;
