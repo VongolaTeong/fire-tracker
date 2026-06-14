@@ -19,14 +19,14 @@ Checkboxes track progress; "Done when" is the bar for moving on.
 ## Step 1 — Project skeleton, safety rails & CI
 Goal: a running, tested Spring Boot app talking to Postgres, with secrets, privacy, and CI handled from commit #1.
 
-- [ ] Spring Boot 3.x project, Java 21 (pick Gradle Kotlin DSL **or** Maven and stay consistent)
-- [ ] `.gitignore` in place **before** the first commit (`.env`, `*.db`, `data/`, `application-local.*`, real `*.csv`)
-- [ ] DB URL/credentials via environment variables only
-- [ ] Flyway wired up; `V1` migration creates `instrument` and `transaction` tables
-- [ ] Transaction CRUD: `POST /api/transactions`, `GET /api/transactions` (date/ticker filters)
-- [ ] `GET /health` liveness endpoint (or Spring Actuator `/actuator/health`)
-- [ ] Testcontainers (Postgres) wired with one thin slice test: boot the context, round-trip a transaction
-- [ ] GitHub Actions CI: build + run tests on every push
+- [ x ] Spring Boot 3.x project on a recent Java LTS (pick Gradle Kotlin DSL **or** Maven and stay consistent)
+- [ x ] `.gitignore` in place **before** the first commit (`.env`, `*.db`, `data/`, `application-local.*`, real `*.csv`)
+- [ x ] DB URL/credentials via environment variables only
+- [ x ] Flyway wired up; `V1` migration creates `instrument` and `transaction` tables
+- [ x ] Transaction CRUD: `POST /api/transactions`, `GET /api/transactions` (date/ticker filters)
+- [ x ] `GET /health` liveness endpoint (or Spring Actuator `/actuator/health`)
+- [ x ] Testcontainers (Postgres) wired with one thin slice test: boot the context, round-trip a transaction
+- [ x ] GitHub Actions CI: build + run tests on every push
 
 Done when: app boots against local Postgres, the migration runs cleanly, you can create/list transactions, and CI is green on push.
 

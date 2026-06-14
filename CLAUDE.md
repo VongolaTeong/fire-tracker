@@ -17,7 +17,7 @@ reported in SGD, with a projected retirement target date ~15 years out.
 
 ## Tech stack
 
-- **Language/Framework:** Java 21, Spring Boot 3.x
+- **Language/Framework:** Java (recent LTS), Spring Boot 3.x
 - **Persistence:** PostgreSQL, Spring Data JPA, Flyway for migrations
 - **Build:** Gradle (Kotlin DSL) or Maven — pick one and stay consistent
 - **Testing:** JUnit 5, Spring Boot Test, Testcontainers (Postgres) for integration tests

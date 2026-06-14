@@ -1,0 +1,38 @@
+######## Build output ########
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+######## Secrets & local config — never commit ########
+.env
+.env.*
+!.env.example
+application-local.properties
+application-local.yml
+application-local.yaml
+src/main/resources/application-local.*
+
+######## Real financial data — never commit ########
+# Local db files and any real ledger exports
+*.db
+data/
+# Ignore CSVs by default; only committed fake samples are allow-listed below.
+*.csv
+!**/sample-*.csv
+
+######## IDE / tooling ########
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+.apt_generated
+.factorypath
+.springBeans
+.sts4-cache
+HELP.md
+
+######## Claude Code local settings ########
+.claude/settings.local.json
