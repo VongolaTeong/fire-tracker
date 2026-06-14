@@ -1,5 +1,6 @@
 package com.firetracker.common;
 
+import com.firetracker.transaction.CsvImportException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,13 @@ public class GlobalExceptionHandler {
             errors.putIfAbsent(fe.getField(), fe.getDefaultMessage());
         }
         problem.setProperty("errors", errors);
+        return problem;
+    }
+
+    @ExceptionHandler(CsvImportException.class)
+    public ProblemDetail handleCsvImport(CsvImportException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problem.setTitle("CSV import failed");
         return problem;
     }
 }

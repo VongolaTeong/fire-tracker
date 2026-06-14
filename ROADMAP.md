@@ -33,10 +33,10 @@ Done when: app boots against local Postgres, the migration runs cleanly, you can
 ## Step 2 — CSV import (idempotent)
 Goal: bulk-load a transaction ledger safely and repeatably.
 
-- [ ] `POST /api/transactions/import` parses the defined CSV format
-- [ ] Dedup via `external_id` so re-running the same file never double-inserts
-- [ ] Commit a **fake** `sample-transactions.csv` and `seed.sql` with invented numbers
-- [ ] Tests: re-import is idempotent (row count stable); a malformed row is rejected cleanly
+- [x] `POST /api/transactions/import` parses the defined CSV format
+- [x] Dedup via `external_id` so re-running the same file never double-inserts
+- [x] Commit a **fake** `sample-transactions.csv` and `seed.sql` with invented numbers
+- [x] Tests: re-import is idempotent (row count stable); a malformed row is rejected cleanly
 
 Done when: importing the sample file twice yields the same row count the second time, with tests proving it.
 

@@ -3,14 +3,18 @@ package com.firetracker.transaction;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.firetracker.transaction.dto.ImportResult;
 import com.firetracker.transaction.dto.TransactionResponse;
+import java.io.Reader;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -18,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -89,5 +94,35 @@ class TransactionControllerTest {
         mockMvc.perform(get("/api/transactions"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    void importsCsvAndReturnsSummary() throws Exception {
+        when(service.importCsv(any(Reader.class))).thenReturn(new ImportResult(3, 2, 1));
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "ledger.csv", "text/csv",
+                "external_id,ticker,type,quantity,price_per_unit,currency,fee,transaction_date\n"
+                        .getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(multipart("/api/transactions/import").file(file))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.received").value(3))
+                .andExpect(jsonPath("$.imported").value(2))
+                .andExpect(jsonPath("$.skippedDuplicates").value(1));
+    }
+
+    @Test
+    void importReturns400OnMalformedCsv() throws Exception {
+        when(service.importCsv(any(Reader.class)))
+                .thenThrow(new CsvImportException("Row 1: unknown type 'NOPE'"));
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "ledger.csv", "text/csv", "bad".getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(multipart("/api/transactions/import").file(file))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("CSV import failed"))
+                .andExpect(jsonPath("$.detail").value("Row 1: unknown type 'NOPE'"));
     }
 }
