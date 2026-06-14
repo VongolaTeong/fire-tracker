@@ -30,4 +30,7 @@ public interface TransactionRepository
             group by t.ticker
             """)
     List<HoldingRow> aggregateHoldings();
+
+    /** The full ledger in chronological order — the cash-flow series for XIRR/CAGR. */
+    List<Transaction> findAllByOrderByTransactionDateAscIdAsc();
 }

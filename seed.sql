@@ -41,9 +41,17 @@ insert into price_history (ticker, price_date, close_price, currency) values
     ('ES3',  '2025-08-15',   3.52, 'SGD')
 on conflict (ticker, price_date) do nothing;
 
--- Manual USD->SGD FX rates (Step 3). 1 USD = `rate` SGD; latest rate_date drives valuation.
--- SGD holdings need no row (they convert at 1). INVENTED numbers.
+-- Manual USD->SGD FX rates. 1 USD = `rate` SGD; latest rate_date drives current valuation,
+-- and each transaction-date rate drives cost-basis conversion for performance (Step 4) — so
+-- this covers every month the seeded VWRA ledger transacts in. SGD holdings need no row
+-- (they convert at 1). INVENTED numbers.
 insert into fx_rate (rate_date, base_currency, quote_currency, rate) values
+    ('2025-01-06', 'USD', 'SGD', 1.36000000),
+    ('2025-02-03', 'USD', 'SGD', 1.35000000),
+    ('2025-03-03', 'USD', 'SGD', 1.34500000),
+    ('2025-04-07', 'USD', 'SGD', 1.33500000),
+    ('2025-05-05', 'USD', 'SGD', 1.33000000),
+    ('2025-06-02', 'USD', 'SGD', 1.33500000),
     ('2025-07-15', 'USD', 'SGD', 1.34000000),
     ('2025-08-15', 'USD', 'SGD', 1.35000000)
 on conflict (rate_date, base_currency, quote_currency) do nothing;
