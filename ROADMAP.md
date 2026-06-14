@@ -54,11 +54,11 @@ Done when: holdings and value endpoints return correct figures against the seede
 ## Step 4 — Performance (XIRR + CAGR) — test-first
 Goal: the core analytics. This is the headline algorithm.
 
-- [ ] Write XIRR tests **first** against known reference cases (cross-check a spreadsheet XIRR)
-- [ ] Implement Newton-Raphson with a bisection fallback for non-convergence
-- [ ] Add CAGR, total invested, unrealized P/L
-- [ ] FX-correct: transaction-date rate for cost basis, latest rate for current value (keep distinct)
-- [ ] `GET /api/portfolio/performance`
+- [x] Write XIRR tests **first** against known reference cases (cross-check a spreadsheet XIRR)
+- [x] Implement Newton-Raphson with a bisection fallback for non-convergence
+- [x] Add CAGR, total invested, unrealized P/L
+- [x] FX-correct: transaction-date rate for cost basis, latest rate for current value (keep distinct)
+- [x] `GET /api/portfolio/performance`
 
 Done when: XIRR matches reference values within tolerance and all performance tests pass.
 
