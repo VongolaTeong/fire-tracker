@@ -35,3 +35,20 @@ management:
 
 server:
   port: ${PORT:8080}
+
+# Market-data ingestion (Step 5). Feeds are free and keyless; scheduling is opt-in per
+# environment so dev/CI/tests never call out. Symbols map an instrument ticker to the price
+# feed's symbol (Stooq).
+app:
+  market-data:
+    reporting-currency: SGD
+    cron: "0 0 18 * * *"
+    scheduling:
+      enabled: ${APP_MARKET_DATA_SCHEDULING_ENABLED:false}
+    fx:
+      base-url: https://api.frankfurter.dev/v1
+    price:
+      base-url: https://stooq.com/q/l/
+      symbols:
+        VWRA: vwra.uk
+        ES3: es3.sg
