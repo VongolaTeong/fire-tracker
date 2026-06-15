@@ -12,15 +12,22 @@ import com.firetracker.portfolio.dto.CurrencyValue;
 import com.firetracker.portfolio.dto.HoldingResponse;
 import com.firetracker.portfolio.dto.PortfolioValueResponse;
 import com.firetracker.portfolio.dto.PositionValue;
+import com.firetracker.portfolio.dto.ValuePoint;
 import com.firetracker.transaction.TransactionService;
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -40,6 +47,16 @@ class PortfolioServiceIntegrationTest {
 
     private static final String HEADER =
             "external_id,ticker,type,quantity,price_per_unit,currency,fee,transaction_date";
+
+    /** Pins "today" to 2025-03-31 so the value-history month-end checkpoints are reproducible. */
+    @TestConfiguration
+    static class FixedClockConfig {
+        @Bean
+        @Primary
+        Clock fixedClock() {
+            return Clock.fixed(Instant.parse("2025-03-31T00:00:00Z"), ZoneOffset.UTC);
+        }
+    }
 
     @Autowired
     PortfolioService portfolio;
@@ -124,6 +141,49 @@ class PortfolioServiceIntegrationTest {
         assertThatThrownBy(() -> portfolio.value())
                 .isInstanceOf(MissingMarketDataException.class)
                 .hasMessageContaining("USD->SGD");
+    }
+
+    @Test
+    void valueHistoryValuesEachMonthEndAsOfThatDate() {
+        // One SGD instrument (no FX): 100 units from Jan, +50 from Mar.
+        transactions.importCsv(new StringReader(HEADER + "\n"
+                + "a1,ACME,BUY,100,10.00,SGD,0.00,2025-01-10\n"
+                + "a2,ACME,BUY,50,12.00,SGD,0.00,2025-03-10\n"));
+        prices.save(new PriceHistory("ACME", LocalDate.of(2025, 1, 15), new BigDecimal("10.50"), "SGD"));
+        prices.save(new PriceHistory("ACME", LocalDate.of(2025, 2, 20), new BigDecimal("11.00"), "SGD"));
+        prices.save(new PriceHistory("ACME", LocalDate.of(2025, 3, 25), new BigDecimal("12.00"), "SGD"));
+
+        List<ValuePoint> series = portfolio.valueHistory();
+
+        // Month-ends from Jan through Mar (today = 2025-03-31, exactly the March month-end).
+        assertThat(series).extracting(ValuePoint::date).containsExactly(
+                LocalDate.of(2025, 1, 31), LocalDate.of(2025, 2, 28), LocalDate.of(2025, 3, 31));
+        assertThat(series.get(0).valueSgd()).isEqualByComparingTo("1050.00"); // 100 × 10.50 (as-of Jan)
+        assertThat(series.get(1).valueSgd()).isEqualByComparingTo("1100.00"); // 100 × 11.00 (as-of Feb)
+        assertThat(series.get(2).valueSgd()).isEqualByComparingTo("1800.00"); // 150 × 12.00 (as-of Mar)
+    }
+
+    @Test
+    void valueHistorySkipsPositionsNotYetPriceableAndUsesAsOfFx() {
+        // USD position bought before any price/FX exists; data only appears from February.
+        transactions.importCsv(new StringReader(HEADER + "\n"
+                + "u1,GLOBL,BUY,10,100.00,USD,0.00,2025-01-10\n"));
+        prices.save(new PriceHistory("GLOBL", LocalDate.of(2025, 2, 10), new BigDecimal("100.00"), "USD"));
+        prices.save(new PriceHistory("GLOBL", LocalDate.of(2025, 3, 10), new BigDecimal("110.00"), "USD"));
+        fxRates.save(new FxRate(LocalDate.of(2025, 2, 5), "USD", "SGD", new BigDecimal("1.30")));
+        fxRates.save(new FxRate(LocalDate.of(2025, 3, 5), "USD", "SGD", new BigDecimal("1.35")));
+
+        List<ValuePoint> series = portfolio.valueHistory();
+
+        assertThat(series).hasSize(3);
+        assertThat(series.get(0).valueSgd()).isEqualByComparingTo("0.00");    // Jan: no price yet
+        assertThat(series.get(1).valueSgd()).isEqualByComparingTo("1300.00"); // 10 × 100 × 1.30
+        assertThat(series.get(2).valueSgd()).isEqualByComparingTo("1485.00"); // 10 × 110 × 1.35
+    }
+
+    @Test
+    void valueHistoryIsEmptyForAnEmptyLedger() {
+        assertThat(portfolio.valueHistory()).isEmpty();
     }
 
     private void seedLedger() {
