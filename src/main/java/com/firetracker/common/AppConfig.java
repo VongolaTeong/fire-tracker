@@ -1,6 +1,7 @@
 package com.firetracker.common;
 
 import com.firetracker.marketdata.MarketDataProperties;
+import com.firetracker.projection.ProjectionProperties;
 import java.time.Clock;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -11,7 +12,7 @@ import org.springframework.web.client.RestClient;
 
 /** Shared application beans. */
 @Configuration
-@EnableConfigurationProperties(MarketDataProperties.class)
+@EnableConfigurationProperties({MarketDataProperties.class, ProjectionProperties.class})
 public class AppConfig {
 
     /**

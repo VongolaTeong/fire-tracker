@@ -1,6 +1,7 @@
 package com.firetracker.common;
 
 import com.firetracker.portfolio.MissingMarketDataException;
+import com.firetracker.projection.InvalidProjectionRequestException;
 import com.firetracker.transaction.CsvImportException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -33,6 +34,13 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleCsvImport(CsvImportException ex) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
         problem.setTitle("CSV import failed");
+        return problem;
+    }
+
+    @ExceptionHandler(InvalidProjectionRequestException.class)
+    public ProblemDetail handleInvalidProjection(InvalidProjectionRequestException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problem.setTitle("Invalid projection request");
         return problem;
     }
 

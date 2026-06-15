@@ -75,10 +75,10 @@ Done when: the scheduled job populates `price_history`/`fx_rate`, is safe to run
 ## Step 6 — Monte Carlo projection — test-first
 Goal: project the FIRE date with uncertainty.
 
-- [ ] Write tests first using a fixed RNG seed so outcomes are deterministic and assertable
-- [ ] Simulate N paths from assumed annual return mean/volatility, continuing the DCA schedule
-- [ ] Report percentile outcomes (p10/p50/p90) at the target date
-- [ ] `GET /api/portfolio/projection?targetDate=YYYY-MM-DD`
+- [x] Write tests first using a fixed RNG seed so outcomes are deterministic and assertable
+- [x] Simulate N paths from assumed annual return mean/volatility, continuing the DCA schedule
+- [x] Report percentile outcomes (p10/p50/p90) at the target date
+- [x] `GET /api/portfolio/projection?targetDate=YYYY-MM-DD`
 
 Done when: the endpoint returns sensible percentile bands and the seeded tests pass deterministically.
 

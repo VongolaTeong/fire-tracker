@@ -52,3 +52,13 @@ app:
       symbols:
         VWRA: vwra.uk
         ES3: es3.sg
+
+# Monte Carlo FIRE projection (Step 6). Conservative broad-market assumptions; the seed is fixed
+# so a given request always returns the same fan. monthly-contribution is only a fallback — the
+# DCA rate is normally inferred from the ledger's actual buy history.
+  projection:
+    annual-mean-return: 0.07
+    annual-volatility: 0.15
+    paths: 10000
+    seed: 42
+    monthly-contribution: 1000.00
