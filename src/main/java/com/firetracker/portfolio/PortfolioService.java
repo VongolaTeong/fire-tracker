@@ -10,11 +10,18 @@ import com.firetracker.portfolio.dto.CurrencyValue;
 import com.firetracker.portfolio.dto.HoldingResponse;
 import com.firetracker.portfolio.dto.PortfolioValueResponse;
 import com.firetracker.portfolio.dto.PositionValue;
+import com.firetracker.portfolio.dto.ValuePoint;
 import com.firetracker.transaction.HoldingRow;
+import com.firetracker.transaction.Transaction;
 import com.firetracker.transaction.TransactionRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -44,15 +51,18 @@ public class PortfolioService {
     private final InstrumentRepository instruments;
     private final PriceHistoryRepository prices;
     private final FxRateRepository fxRates;
+    private final Clock clock;
 
     public PortfolioService(TransactionRepository transactions,
                             InstrumentRepository instruments,
                             PriceHistoryRepository prices,
-                            FxRateRepository fxRates) {
+                            FxRateRepository fxRates,
+                            Clock clock) {
         this.transactions = transactions;
         this.instruments = instruments;
         this.prices = prices;
         this.fxRates = fxRates;
+        this.clock = clock;
     }
 
     /** Net units held per instrument (zero-net positions omitted), with trading currency. */
@@ -83,6 +93,90 @@ public class PortfolioService {
 
         return new PortfolioValueResponse(
                 REPORTING_CURRENCY, totalValueSgd, positions, breakdownByCurrency(positions));
+    }
+
+    /**
+     * Portfolio market value (SGD) at each month-end from the first transaction through today.
+     * Each point values the units held as-of that date at the price and FX rate current then, so
+     * the series reflects how the portfolio was actually worth over time, not back-projected with
+     * today's prices. Unlike {@link #value()}, a position with no price/FX as-of a date simply
+     * contributes nothing that month (early dates may predate market data) rather than failing.
+     */
+    @Transactional(readOnly = true)
+    public List<ValuePoint> valueHistory() {
+        List<Transaction> ledger = transactions.findAllByOrderByTransactionDateAscIdAsc();
+        if (ledger.isEmpty()) {
+            return List.of();
+        }
+
+        List<LocalDate> checkpoints = monthEndCheckpoints(
+                ledger.get(0).getTransactionDate(), LocalDate.now(clock));
+
+        Map<String, BigDecimal> unitsByTicker = new HashMap<>();
+        List<ValuePoint> series = new ArrayList<>(checkpoints.size());
+        int cursor = 0;
+        for (LocalDate date : checkpoints) {
+            // Accumulate net units for every transaction settled on or before this checkpoint.
+            while (cursor < ledger.size() && !ledger.get(cursor).getTransactionDate().isAfter(date)) {
+                Transaction t = ledger.get(cursor++);
+                BigDecimal delta = switch (t.getType()) {
+                    case BUY -> t.getQuantity();
+                    case SELL -> t.getQuantity().negate();
+                    case DIVIDEND -> BigDecimal.ZERO; // cash distribution, not a change in units
+                };
+                unitsByTicker.merge(t.getTicker(), delta, BigDecimal::add);
+            }
+            series.add(new ValuePoint(date, valueAsOf(unitsByTicker, date)));
+        }
+        return series;
+    }
+
+    /** SGD value of the given net positions, priced and FX-converted as-of {@code date}. */
+    private BigDecimal valueAsOf(Map<String, BigDecimal> unitsByTicker, LocalDate date) {
+        BigDecimal total = BigDecimal.ZERO;
+        for (Map.Entry<String, BigDecimal> position : unitsByTicker.entrySet()) {
+            BigDecimal units = position.getValue();
+            if (units.signum() == 0) {
+                continue;
+            }
+            PriceHistory price = prices
+                    .findFirstByTickerAndPriceDateLessThanEqualOrderByPriceDateDesc(position.getKey(), date)
+                    .orElse(null);
+            if (price == null) {
+                continue; // not yet priceable as-of this date
+            }
+            BigDecimal fxRate = fxRateToSgdAsOf(price.getCurrency(), date);
+            if (fxRate == null) {
+                continue; // no FX rate available as-of this date
+            }
+            total = total.add(units.multiply(price.getClosePrice()).multiply(fxRate));
+        }
+        return money(total);
+    }
+
+    /** {@code currency → SGD} rate as-of {@code date}, or {@code null} when none exists yet. */
+    private BigDecimal fxRateToSgdAsOf(String currency, LocalDate date) {
+        if (REPORTING_CURRENCY.equals(currency)) {
+            return BigDecimal.ONE;
+        }
+        return fxRates
+                .findFirstByBaseCurrencyAndQuoteCurrencyAndRateDateLessThanEqualOrderByRateDateDesc(
+                        currency, REPORTING_CURRENCY, date)
+                .map(FxRate::getRate)
+                .orElse(null);
+    }
+
+    /** End-of-month dates from {@code first}'s month through today's, the last capped at today. */
+    private static List<LocalDate> monthEndCheckpoints(LocalDate first, LocalDate today) {
+        List<LocalDate> dates = new ArrayList<>();
+        YearMonth month = YearMonth.from(first);
+        YearMonth current = YearMonth.from(today);
+        while (!month.isAfter(current)) {
+            LocalDate endOfMonth = month.atEndOfMonth();
+            dates.add(endOfMonth.isAfter(today) ? today : endOfMonth);
+            month = month.plusMonths(1);
+        }
+        return dates;
     }
 
     private PositionValue valuePosition(HoldingRow holding) {

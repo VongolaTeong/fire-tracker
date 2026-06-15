@@ -2,6 +2,13 @@
 target/
 .mvn/wrapper/maven-wrapper.jar
 
+######## Frontend (Vue/Vite) ########
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+npm-debug.log*
+
 ######## Secrets & local config — never commit ########
 .env
 .env.*

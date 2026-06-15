@@ -10,6 +10,7 @@ import com.firetracker.portfolio.dto.CurrencyValue;
 import com.firetracker.portfolio.dto.HoldingResponse;
 import com.firetracker.portfolio.dto.PortfolioValueResponse;
 import com.firetracker.portfolio.dto.PositionValue;
+import com.firetracker.portfolio.dto.ValuePoint;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -65,6 +66,21 @@ class PortfolioControllerTest {
                 .andExpect(jsonPath("$.positions[0].ticker").value("VWRA"))
                 .andExpect(jsonPath("$.positions[0].currency").value("USD"))
                 .andExpect(jsonPath("$.byCurrency[0].currency").value("USD"));
+    }
+
+    @Test
+    void returnsValueHistorySeries() throws Exception {
+        when(service.valueHistory()).thenReturn(List.of(
+                new ValuePoint(LocalDate.of(2025, 1, 31), new BigDecimal("1050.00")),
+                new ValuePoint(LocalDate.of(2025, 2, 28), new BigDecimal("1100.00"))));
+
+        mockMvc.perform(get("/api/portfolio/value-history"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].date").value("2025-01-31"))
+                .andExpect(jsonPath("$[0].valueSgd").value(1050.00))
+                .andExpect(jsonPath("$[1].date").value("2025-02-28"));
     }
 
     @Test

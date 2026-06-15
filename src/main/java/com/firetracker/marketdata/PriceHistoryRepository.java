@@ -14,6 +14,14 @@ public interface PriceHistoryRepository extends JpaRepository<PriceHistory, Long
     Optional<PriceHistory> findFirstByTickerOrderByPriceDateDesc(String ticker);
 
     /**
+     * The price for a ticker as-of a given date: the latest close on or before it. Used to value
+     * the portfolio at historical points in time (the value-over-time series), so each past date
+     * is priced with the data that was current then.
+     */
+    Optional<PriceHistory> findFirstByTickerAndPriceDateLessThanEqualOrderByPriceDateDesc(
+            String ticker, LocalDate priceDate);
+
+    /**
      * Insert a price, or refresh it in place if one already exists for this
      * {@code (ticker, price_date)} — a real upsert keyed on the business unique constraint,
      * not JPA's PK-based merge. This is what makes the ingestion job idempotent: re-running it

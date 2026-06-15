@@ -2,6 +2,7 @@ package com.firetracker.portfolio;
 
 import com.firetracker.portfolio.dto.HoldingResponse;
 import com.firetracker.portfolio.dto.PortfolioValueResponse;
+import com.firetracker.portfolio.dto.ValuePoint;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,5 +27,11 @@ public class PortfolioController {
     @GetMapping("/value")
     public PortfolioValueResponse value() {
         return service.value();
+    }
+
+    /** Portfolio SGD value at each month-end from the first transaction through today. */
+    @GetMapping("/value-history")
+    public List<ValuePoint> valueHistory() {
+        return service.valueHistory();
     }
 }

@@ -85,11 +85,11 @@ Done when: the endpoint returns sensible percentile bands and the seeded tests p
 ## Step 7 — Vue dashboard
 Goal: a thin, polished frontend that makes the live demo land.
 
-- [ ] Vue 3 (Composition API) + Vite app, env-based API base URL
-- [ ] Portfolio value-over-time chart (Chart.js via `vue-chartjs`, or ECharts)
-- [ ] FIRE projection fan chart (p10/p50/p90)
-- [ ] CORS configured on the backend for the frontend origin
-- [ ] (Optional) component test for the API-response → chart-data mapping
+- [x] Vue 3 (Composition API) + Vite app, env-based API base URL
+- [x] Portfolio value-over-time chart (Chart.js via `vue-chartjs`, or ECharts)
+- [x] FIRE projection fan chart (p10/p50/p90)
+- [x] CORS configured on the backend for the frontend origin
+- [x] (Optional) component test for the API-response → chart-data mapping
 
 Done when: the dashboard renders real numbers from the API locally.
 
