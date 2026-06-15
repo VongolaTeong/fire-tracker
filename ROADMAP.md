@@ -65,10 +65,10 @@ Done when: XIRR matches reference values within tolerance and all performance te
 ## Step 5 — Price/FX ingestion (scheduled, idempotent)
 Goal: keep prices and rates current without manual rows.
 
-- [ ] `PriceProvider` / `FxProvider` interfaces (provider is swappable)
-- [ ] One free market-data API implementation behind each interface
-- [ ] `@Scheduled` daily job using upserts (`ON CONFLICT ... DO UPDATE`) on the unique constraints
-- [ ] Tests: the upsert job is idempotent (run twice, no dupes); providers are mocked in tests
+- [x] `PriceProvider` / `FxProvider` interfaces (provider is swappable)
+- [x] One free market-data API implementation behind each interface
+- [x] `@Scheduled` daily job using upserts (`ON CONFLICT ... DO UPDATE`) on the unique constraints
+- [x] Tests: the upsert job is idempotent (run twice, no dupes); providers are mocked in tests
 
 Done when: the scheduled job populates `price_history`/`fx_rate`, is safe to run twice, and tests prove the idempotency.
 
