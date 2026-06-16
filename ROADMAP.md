@@ -96,9 +96,9 @@ Done when: the dashboard renders real numbers from the API locally.
 ## Step 8 — Coverage sweep & docs
 Goal: close gaps and make it easy to read. (Most tests already exist from earlier steps — this is the sweep, not the start.)
 
-- [ ] Review coverage; add end-to-end integration tests for any flow not yet covered (import → holdings → value → performance → projection)
-- [ ] README: architecture diagram + API docs + run instructions
-- [ ] Confirm tests pass from a clean checkout using only the fake seed data
+- [x] Review coverage; add end-to-end integration tests for any flow not yet covered (import → holdings → value → performance → projection)
+- [x] README: architecture diagram + API docs + run instructions
+- [x] Confirm tests pass from a clean checkout using only the fake seed data
 
 Done when: `clean checkout → run tests → all green` with no real data or secrets, and the main flows have integration coverage.
 
