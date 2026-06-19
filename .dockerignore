@@ -1,0 +1,17 @@
+# The image build only needs pom.xml + src/. Keep the build context small and never ship
+# the frontend, local secrets, or VCS metadata into the backend image.
+target/
+frontend/
+node_modules/
+.git/
+.github/
+.idea/
+.vscode/
+.mvn/
+data/
+*.md
+.env
+.env.*
+application-local.yml
+application-local.properties
+*.csv
