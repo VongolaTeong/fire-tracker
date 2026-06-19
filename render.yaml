@@ -1,0 +1,27 @@
+# Render Blueprint — provisions the backend web service from the Dockerfile.
+#
+# The database lives on Neon (free, persistent), NOT here — Render's own free Postgres expires.
+# Secrets are marked `sync: false`, meaning Render will NOT read them from this file; set them in
+# the dashboard after the service is created (see DEPLOY.md). Never commit real credentials.
+services:
+  - type: web
+    name: fire-tracker-api
+    runtime: docker
+    plan: free
+    region: singapore          # closest free region for an SGD/Singapore demo
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    autoDeploy: true           # redeploy on push to the connected branch
+    envVars:
+      # --- set these in the Render dashboard (Environment tab) ---
+      - key: DATABASE_URL          # jdbc:postgresql://<neon-host>/<db>?sslmode=require
+        sync: false
+      - key: DATABASE_USERNAME
+        sync: false
+      - key: DATABASE_PASSWORD
+        sync: false
+      - key: APP_CORS_ALLOWED_ORIGINS  # your Netlify URL, e.g. https://fire-tracker.netlify.app
+        sync: false
+      # --- safe to keep in source ---
+      - key: APP_MARKET_DATA_SCHEDULING_ENABLED
+        value: "false"           # demo runs on seeded data; flip to "true" to enable daily pulls

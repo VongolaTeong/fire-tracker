@@ -1,0 +1,15 @@
+# Netlify build config for the Vue dashboard (deployed separately from the backend).
+#
+# Set VITE_API_BASE_URL (your Render backend URL, e.g. https://fire-tracker-api.onrender.com) in
+# Netlify's environment variables. Vite inlines it at BUILD time, so it must be present before the
+# build runs and a change requires a rebuild — it is not read at runtime.
+[build]
+  base = "frontend"        # Netlify cd's here first
+  command = "npm run build"
+  publish = "dist"         # relative to base -> frontend/dist
+
+# SPA fallback so a refresh on any path resolves to index.html (harmless for the single-page app).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
