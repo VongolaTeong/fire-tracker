@@ -1,5 +1,9 @@
 # FIRE Portfolio Tracker
 
+[Live Demo](https://brilliant-fox-7d4690.netlify.app/)
+
+Note: the demo link might take a long time to respond since we are using free tier hosting, it spins down due to inactivity. 
+
 A backend-first portfolio analytics engine (Java / Spring Boot + PostgreSQL) for tracking a
 dollar-cost-averaging (DCA) strategy and projecting a financial-independence (FIRE) date. It
 ingests a generic transaction ledger and computes holdings, FX-correct valuation, money-weighted
